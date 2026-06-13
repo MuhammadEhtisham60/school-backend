@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { apiRouter } from './routes/index.js';
+import { errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
 
@@ -25,15 +26,7 @@ app.use((req, res, next) => {
 });
 
 // Global Error Handler middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled Server Error:', err);
-  
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
+app.use(errorHandler);
 
 export default app;
 // CREATE DATABASE "edu-school"
