@@ -69,3 +69,89 @@ export const validateLogin = (data) => {
     errors
   };
 };
+
+/**
+ * Validate forgot password payload.
+ */
+export const validateForgotPassword = (data) => {
+  const { email } = data;
+  const errors = [];
+
+  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
+    errors.push('email is required and must be a valid email address');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+/**
+ * Validate verify OTP payload.
+ */
+export const validateVerifyOtp = (data) => {
+  const { email, otp } = data;
+  const errors = [];
+
+  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
+    errors.push('email is required and must be a valid email address');
+  }
+
+  if (!otp || typeof otp !== 'string' || !/^\d{6}$/.test(otp)) {
+    errors.push('otp is required and must be a 6-digit numeric string');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+/**
+ * Validate resend OTP payload.
+ */
+export const validateResendOtp = (data) => {
+  const { email } = data;
+  const errors = [];
+
+  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
+    errors.push('email is required and must be a valid email address');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+/**
+ * Validate reset password payload.
+ */
+export const validateResetPassword = (data) => {
+  const { email, otp, password, confirmPassword } = data;
+  const errors = [];
+
+  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
+    errors.push('email is required and must be a valid email address');
+  }
+
+  if (!otp || typeof otp !== 'string' || !/^\d{6}$/.test(otp)) {
+    errors.push('otp is required and must be a 6-digit numeric string');
+  }
+
+  if (!password || typeof password !== 'string' || password.length < 6) {
+    errors.push('password is required and must be at least 6 characters long');
+  }
+
+  if (!confirmPassword || typeof confirmPassword !== 'string') {
+    errors.push('confirmPassword is required and must be a string');
+  } else if (password !== confirmPassword) {
+    errors.push('password and confirmPassword must match');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};

@@ -64,6 +64,8 @@ export const initDB = async () => {
         address VARCHAR(255) NOT NULL,
         contact VARCHAR(50) NOT NULL,
         academic_session VARCHAR(100) NOT NULL,
+        reset_otp VARCHAR(6) DEFAULT NULL,
+        reset_otp_expiry TIMESTAMP DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -75,6 +77,8 @@ export const initDB = async () => {
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS address VARCHAR(255) DEFAULT \'\'');
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS contact VARCHAR(50) DEFAULT \'\'');
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS academic_session VARCHAR(100) DEFAULT \'\'');
+    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp VARCHAR(6) DEFAULT NULL');
+    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_expiry TIMESTAMP DEFAULT NULL');
 
     console.log('Users table verified/created successfully.');
   } catch (tableErr) {
