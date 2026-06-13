@@ -60,11 +60,22 @@ export const initDB = async () => {
         last_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        school_name VARCHAR(255) NOT NULL,
+        address VARCHAR(255) NOT NULL,
+        contact VARCHAR(50) NOT NULL,
+        academic_session VARCHAR(100) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
     await client.query(createTableQuery);
+
+    // Run migrations to alter schema if table was created in a previous execution without these columns
+    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS school_name VARCHAR(255) DEFAULT \'\'');
+    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS address VARCHAR(255) DEFAULT \'\'');
+    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS contact VARCHAR(50) DEFAULT \'\'');
+    await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS academic_session VARCHAR(100) DEFAULT \'\'');
+
     console.log('Users table verified/created successfully.');
   } catch (tableErr) {
     console.error('Failed to initialize users table:', tableErr);

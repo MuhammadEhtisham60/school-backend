@@ -9,5 +9,7 @@ router.use(authMiddleware);
 
 router.get('/', getProfile);
 router.put('/', updateProfile);
+router.post('/', updateProfile);
+router.patch('/', updateProfile);
 
 export default router;

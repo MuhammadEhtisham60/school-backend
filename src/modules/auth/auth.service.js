@@ -19,6 +19,10 @@ const formatUser = (user) => ({
   firstName: user.first_name,
   lastName: user.last_name,
   email: user.email,
+  schoolName: user.school_name,
+  address: user.address,
+  contact: user.contact,
+  academicSession: user.academic_session,
   createdAt: user.created_at,
   updatedAt: user.updated_at
 });
@@ -27,7 +31,7 @@ const formatUser = (user) => ({
  * Register a new user.
  */
 export const signup = async (userData) => {
-  const { firstName, lastName, email, password } = userData;
+  const { firstName, lastName, email, password, schoolName, address, contact, academicSession } = userData;
 
   // Verify unique email
   const existingUser = await authRepository.getUserByEmail(email);
@@ -43,7 +47,11 @@ export const signup = async (userData) => {
     firstName,
     lastName,
     email,
-    hashedPassword
+    hashedPassword,
+    schoolName,
+    address,
+    contact,
+    academicSession
   });
 
   // Generate token

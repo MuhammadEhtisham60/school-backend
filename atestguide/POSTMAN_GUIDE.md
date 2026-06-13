@@ -26,7 +26,11 @@ This guide explains how to test the Authentication and Profile APIs using Postma
     "firstName": "John",
     "lastName": "Doe",
     "email": "john.doe@example.com",
-    "password": "mySecurePassword123"
+    "password": "mySecurePassword123",
+    "schoolName": "Springfield High",
+    "address": "742 Evergreen Terrace",
+    "contact": "+1-555-0199",
+    "academicSession": "2026-2027"
   }
   ```
 * **Postman Setup**:
@@ -45,6 +49,10 @@ This guide explains how to test the Authentication and Profile APIs using Postma
       "firstName": "John",
       "lastName": "Doe",
       "email": "john.doe@example.com",
+      "schoolName": "Springfield High",
+      "address": "742 Evergreen Terrace",
+      "contact": "+1-555-0199",
+      "academicSession": "2026-2027",
       "createdAt": "2026-06-13T20:25:00.000Z",
       "updatedAt": "2026-06-13T20:25:00.000Z"
     }

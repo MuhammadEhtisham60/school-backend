@@ -6,7 +6,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * @returns {object} { isValid: boolean, errors: string[] }
  */
 export const validateSignup = (data) => {
-  const { firstName, lastName, email, password } = data;
+  const { firstName, lastName, email, password, schoolName, address, contact, academicSession } = data;
   const errors = [];
 
   if (!firstName || typeof firstName !== 'string' || firstName.trim() === '') {
@@ -23,6 +23,22 @@ export const validateSignup = (data) => {
 
   if (!password || typeof password !== 'string' || password.length < 6) {
     errors.push('password is required and must be at least 6 characters long');
+  }
+
+  if (!schoolName || typeof schoolName !== 'string' || schoolName.trim() === '') {
+    errors.push('schoolName is required and must be a non-empty string');
+  }
+
+  if (!address || typeof address !== 'string' || address.trim() === '') {
+    errors.push('address is required and must be a non-empty string');
+  }
+
+  if (!contact || typeof contact !== 'string' || contact.trim() === '') {
+    errors.push('contact is required and must be a non-empty string');
+  }
+
+  if (!academicSession || typeof academicSession !== 'string' || academicSession.trim() === '') {
+    errors.push('academicSession is required and must be a non-empty string');
   }
 
   return {

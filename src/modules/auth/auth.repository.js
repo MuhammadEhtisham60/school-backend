@@ -20,12 +20,21 @@ export const getUserByEmail = async (email) => {
  * @param {string} userData.hashedPassword - Hashed password.
  * @returns {Promise<object>} The created user record.
  */
-export const createUser = async ({ firstName, lastName, email, hashedPassword }) => {
+export const createUser = async ({ firstName, lastName, email, hashedPassword, schoolName, address, contact, academicSession }) => {
   const sql = `
-    INSERT INTO users (first_name, last_name, email, password)
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO users (first_name, last_name, email, password, school_name, address, contact, academic_session)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *
   `;
-  const { rows } = await query(sql, [firstName, lastName, email, hashedPassword]);
+  const { rows } = await query(sql, [
+    firstName,
+    lastName,
+    email,
+    hashedPassword,
+    schoolName,
+    address,
+    contact,
+    academicSession
+  ]);
   return rows[0];
 };
