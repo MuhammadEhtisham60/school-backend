@@ -17,4 +17,3 @@ apiRouter.use('/profile', profileRouter);
 
 // Student routes
 apiRouter.use('/students', studentRouter);
-
