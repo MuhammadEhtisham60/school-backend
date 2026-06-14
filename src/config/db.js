@@ -121,6 +121,7 @@ export const initDB = async () => {
         prev_result_card VARCHAR(255) DEFAULT NULL,
         guardian_cnic VARCHAR(255) DEFAULT NULL,
         is_active BOOLEAN DEFAULT TRUE,
+        fees JSONB DEFAULT '{}',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -129,6 +130,7 @@ export const initDB = async () => {
 
     // Run migrations to alter schema if table was created in a previous execution without this column
     await client.query('ALTER TABLE students ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE');
+    await client.query('ALTER TABLE students ADD COLUMN IF NOT EXISTS fees JSONB DEFAULT \'{}\'');
 
     console.log('Students table verified/created successfully.');
   } catch (tableErr) {

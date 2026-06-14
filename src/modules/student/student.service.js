@@ -62,6 +62,7 @@ export const formatStudent = (s) => {
     guardianCnic: s.guardian_cnic,
     isActive: s.is_active,
     is_active: s.is_active, // user requested return of is_active specifically
+    fees: typeof s.fees === 'string' ? JSON.parse(s.fees) : (s.fees || {}),
     createdAt: s.created_at,
     updatedAt: s.updated_at
   };
@@ -82,6 +83,28 @@ const generateRollNo = () => {
   const year = new Date().getFullYear();
   const rand = Math.floor(100 + Math.random() * 900); // 3 digits
   return `${year}-${rand}`;
+};
+
+/**
+ * Initialize 12-month fee records for a new student.
+ */
+const initializeFees = (defaultAmount = 5000) => {
+  const months = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'
+  ];
+  const feesObj = {};
+  months.forEach(month => {
+    feesObj[month] = {
+      status: 'pending',
+      amount: defaultAmount,
+      paid_amount: 0,
+      due_amount: defaultAmount,
+      paid_at: null,
+      remarks: ''
+    };
+  });
+  return feesObj;
 };
 
 /**
@@ -108,6 +131,10 @@ export const enrollStudent = async (data, files = {}) => {
   } else if (data.isActive !== undefined) {
     isActive = String(data.isActive).toLowerCase() === 'true';
   }
+
+  // Initialize 12 months fees (defaults to 5000)
+  const defaultFeeAmount = data.monthlyFee ? Number(data.monthlyFee) : 5000;
+  const fees = initializeFees(defaultFeeAmount);
 
   // Process files: extract paths/filenames for columns
   const photo = files.photo ? `/uploads/${files.photo[0].filename}` : (data.photo || null);
@@ -152,7 +179,8 @@ export const enrollStudent = async (data, files = {}) => {
     bFormCopy,
     prevResultCard,
     guardianCnic,
-    isActive
+    isActive,
+    fees
   };
 
   const student = await studentRepository.createStudent(studentPayload);
@@ -263,4 +291,103 @@ export const deleteStudent = async (id) => {
     throw createError(`Student with ID ${id} not found.`, 404);
   }
   return studentRepository.deleteStudent(id);
+};
+
+/**
+ * Retrieve a student's 12-month fees.
+ */
+export const getStudentFees = async (id) => {
+  const student = await studentRepository.getStudentById(id);
+  if (!student) {
+    throw createError(`Student with ID ${id} not found.`, 404);
+  }
+  return typeof student.fees === 'string' ? JSON.parse(student.fees) : (student.fees || {});
+};
+
+/**
+ * Update monthly fee record parameters.
+ */
+export const updateMonthlyFee = async (id, month, data) => {
+  const student = await studentRepository.getStudentById(id);
+  if (!student) {
+    throw createError(`Student with ID ${id} not found.`, 404);
+  }
+
+  const fees = typeof student.fees === 'string' ? JSON.parse(student.fees) : (student.fees || {});
+  const normalizedMonth = month.toLowerCase();
+  if (!fees[normalizedMonth]) {
+    throw createError(`Invalid month name: ${month}`, 400);
+  }
+
+  const monthRecord = fees[normalizedMonth];
+
+  // Update provided fields
+  if (data.amount !== undefined) monthRecord.amount = Number(data.amount);
+  if (data.paid_amount !== undefined) monthRecord.paid_amount = Number(data.paid_amount);
+  if (data.remarks !== undefined) monthRecord.remarks = data.remarks;
+  if (data.paid_at !== undefined) monthRecord.paid_at = data.paid_at || null;
+
+  // Recalculate remaining due amount
+  monthRecord.due_amount = monthRecord.amount - monthRecord.paid_amount;
+
+  // Auto update status based on payment if not explicitly overridden
+  if (data.status !== undefined) {
+    monthRecord.status = data.status;
+  } else {
+    if (monthRecord.paid_amount === 0) {
+      monthRecord.status = 'pending';
+    } else if (monthRecord.paid_amount === monthRecord.amount) {
+      monthRecord.status = 'paid';
+    } else {
+      monthRecord.status = 'partial';
+    }
+  }
+
+  await studentRepository.updateStudentFees(id, fees);
+  return fees[normalizedMonth];
+};
+
+/**
+ * Record a payment for a specific month.
+ */
+export const payMonthlyFee = async (id, month, data) => {
+  const student = await studentRepository.getStudentById(id);
+  if (!student) {
+    throw createError(`Student with ID ${id} not found.`, 404);
+  }
+
+  const fees = typeof student.fees === 'string' ? JSON.parse(student.fees) : (student.fees || {});
+  const normalizedMonth = month.toLowerCase();
+  if (!fees[normalizedMonth]) {
+    throw createError(`Invalid month name: ${month}`, 400);
+  }
+
+  const monthRecord = fees[normalizedMonth];
+
+  // Extract payment value (supports both "amount" and "paid_amount" keys)
+  const payVal = Number(data.amount !== undefined ? data.amount : (data.paid_amount !== undefined ? data.paid_amount : 0));
+  if (isNaN(payVal) || payVal <= 0) {
+    throw createError('Payment amount must be a number greater than 0', 400);
+  }
+
+  const newPaidAmount = monthRecord.paid_amount + payVal;
+  if (newPaidAmount > monthRecord.amount) {
+    throw createError(`Payment of ${payVal} would exceed the remaining month fee limit. Total paid cannot exceed ${monthRecord.amount}.`, 400);
+  }
+
+  monthRecord.paid_amount = newPaidAmount;
+  monthRecord.due_amount = monthRecord.amount - monthRecord.paid_amount;
+
+  // Automatically update status based on payment amount
+  if (monthRecord.paid_amount === monthRecord.amount) {
+    monthRecord.status = 'paid';
+  } else {
+    monthRecord.status = 'partial';
+  }
+
+  monthRecord.paid_at = data.paid_at || new Date().toISOString().split('T')[0];
+  if (data.remarks !== undefined) monthRecord.remarks = data.remarks;
+
+  await studentRepository.updateStudentFees(id, fees);
+  return fees[normalizedMonth];
 };

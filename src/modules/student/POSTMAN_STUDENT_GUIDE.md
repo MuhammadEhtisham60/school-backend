@@ -195,6 +195,111 @@ This guide explains how to test the Student Admission and CRUD APIs using Postma
 
 ---
 
+### 6. Get Student Fee Details
+- **Method**: `GET`
+- **URL**: `http://localhost:5000/api/students/:id/fees`
+- **Headers**:
+  - `Authorization: Bearer <token>`
+- **Postman Setup**: Replace `:id` with the student ID.
+
+- **Expected Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Student fee details retrieved successfully",
+    "fees": {
+      "january": {
+        "status": "pending",
+        "amount": 5000,
+        "paid_amount": 0,
+        "due_amount": 5000,
+        "paid_at": null,
+        "remarks": ""
+      },
+      "february": {
+        "status": "paid",
+        "amount": 5000,
+        "paid_amount": 5000,
+        "due_amount": 0,
+        "paid_at": "2026-06-14",
+        "remarks": "Paid in full"
+      }
+    }
+  }
+  ```
+
+---
+
+### 7. Update Monthly Fee Details
+- **Method**: `PATCH`
+- **URL**: `http://localhost:5000/api/students/:id/fees/:month`
+- **Headers**:
+  - `Authorization: Bearer <token>`
+  - `Content-Type: application/json`
+- **Postman Setup**:
+  1. Replace `:id` with the student ID, and `:month` with a valid month (e.g. `january` or `february`).
+  2. Go to **Body** tab, select **raw**, choose **JSON**, and paste a payload.
+- **Body (raw JSON)**:
+  ```json
+  {
+    "amount": 6000,
+    "paid_amount": 2000,
+    "paid_at": "2026-06-14",
+    "remarks": "Partial fee update"
+  }
+  ```
+- **Expected Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Monthly fee details updated successfully",
+    "month": {
+      "status": "partial",
+      "amount": 6000,
+      "paid_amount": 2000,
+      "due_amount": 4000,
+      "paid_at": "2026-06-14",
+      "remarks": "Partial fee update"
+    }
+  }
+  ```
+
+---
+
+### 8. Mark Fee as Paid (Incremental Payment)
+- **Method**: `POST`
+- **URL**: `http://localhost:5000/api/students/:id/fees/:month/pay`
+- **Headers**:
+  - `Authorization: Bearer <token>`
+  - `Content-Type: application/json`
+- **Postman Setup**:
+  1. Replace `:id` with the student ID, and `:month` with the month name (e.g. `january`).
+  2. Go to **Body** tab, select **raw**, choose **JSON**, and paste the payment amount.
+- **Body (raw JSON)**:
+  ```json
+  {
+    "amount": 4000,
+    "remarks": "Final payment"
+  }
+  ```
+- **Expected Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Fee payment recorded successfully",
+    "month": {
+      "status": "paid",
+      "amount": 6000,
+      "paid_amount": 6000,
+      "due_amount": 0,
+      "paid_at": "2026-06-14",
+      "remarks": "Final payment"
+    }
+  }
+  ```
+
+---
+
 ## 3. Testing Error Scenarios
 
 - **Unauthorized (401)**: Remove the `Authorization` header and request any endpoint. You should get a `401 Unauthorized` status.

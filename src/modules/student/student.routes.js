@@ -61,4 +61,9 @@ router.get('/:id', studentController.getStudentDetails);
 router.put('/:id', uploadFields, studentController.updateStudent);
 router.delete('/:id', studentController.deleteStudent);
 
+// Student Fee Management routes
+router.get('/:id/fees', studentController.getStudentFees);
+router.patch('/:id/fees/:month', studentController.updateMonthlyFee);
+router.post('/:id/fees/:month/pay', studentController.payMonthlyFee);
+
 export default router;

@@ -1,5 +1,5 @@
 import * as studentService from './student.service.js';
-import { validateCreateStudent, validateUpdateStudent } from './student.validation.js';
+import { validateCreateStudent, validateUpdateStudent, validateFeeUpdate, validateFeePayment } from './student.validation.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 
 /**
@@ -83,6 +83,55 @@ export const deleteStudent = async (req, res, next) => {
     const { id } = req.params;
     await studentService.deleteStudent(id);
     return sendSuccess(res, 'Student deleted successfully', {}, 200);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Retrieve a student's 12-month fees.
+ */
+export const getStudentFees = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const fees = await studentService.getStudentFees(id);
+    return sendSuccess(res, 'Student fee details retrieved successfully', { fees }, 200);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Update monthly fee details.
+ */
+export const updateMonthlyFee = async (req, res, next) => {
+  try {
+    const { id, month } = req.params;
+    const { isValid, errors } = validateFeeUpdate(req.body, month);
+    if (!isValid) {
+      return sendError(res, 'Validation failed', 400, errors);
+    }
+    
+    const updatedMonth = await studentService.updateMonthlyFee(id, month, req.body);
+    return sendSuccess(res, 'Monthly fee details updated successfully', { month: updatedMonth }, 200);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Record payment for a specific month.
+ */
+export const payMonthlyFee = async (req, res, next) => {
+  try {
+    const { id, month } = req.params;
+    const { isValid, errors } = validateFeePayment(req.body, month);
+    if (!isValid) {
+      return sendError(res, 'Validation failed', 400, errors);
+    }
+    
+    const updatedMonth = await studentService.payMonthlyFee(id, month, req.body);
+    return sendSuccess(res, 'Fee payment recorded successfully', { month: updatedMonth }, 200);
   } catch (err) {
     next(err);
   }
