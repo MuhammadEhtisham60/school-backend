@@ -26,11 +26,12 @@ export const enrollStudent = async (req, res, next) => {
  */
 export const getStudentsList = async (req, res, next) => {
   try {
-    const { search, class: classFilter, section, limit, offset } = req.query;
+    const { search, class: classFilter, section, is_active, isActive, limit, offset } = req.query;
     const filters = {
       search,
       class: classFilter,
       section,
+      isActive: is_active !== undefined ? is_active : isActive,
       limit: limit ? parseInt(limit, 10) : undefined,
       offset: offset ? parseInt(offset, 10) : undefined
     };

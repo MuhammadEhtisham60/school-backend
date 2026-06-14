@@ -120,11 +120,16 @@ export const initDB = async () => {
         b_form_copy VARCHAR(255) DEFAULT NULL,
         prev_result_card VARCHAR(255) DEFAULT NULL,
         guardian_cnic VARCHAR(255) DEFAULT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
     await client.query(createStudentsTableQuery);
+
+    // Run migrations to alter schema if table was created in a previous execution without this column
+    await client.query('ALTER TABLE students ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE');
+
     console.log('Students table verified/created successfully.');
   } catch (tableErr) {
     console.error('Failed to initialize users table:', tableErr);

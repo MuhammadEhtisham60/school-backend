@@ -12,13 +12,13 @@ export const createStudent = async (s) => {
       prev_school, last_result, admission_date, mobile, alt_contact, email, city, address,
       father_full_name, father_cnic, occupation, father_phone, mother_name, mother_phone,
       blood, emergency, medical, disability, transport, bus_route, hostel,
-      student_photo, b_form_copy, prev_result_card, guardian_cnic
+      student_photo, b_form_copy, prev_result_card, guardian_cnic, is_active
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
       $11, $12, $13, $14, $15, $16, $17, $18,
       $19, $20, $21, $22, $23, $24,
       $25, $26, $27, $28, $29, $30, $31,
-      $32, $33, $34, $35
+      $32, $33, $34, $35, $36
     )
     RETURNING *
   `;
@@ -28,7 +28,7 @@ export const createStudent = async (s) => {
     s.prevSchool, s.lastResult, s.admissionDate, s.mobile, s.altContact, s.email, s.city, s.address,
     s.fatherFullName, s.fatherCNIC, s.occupation, s.fatherPhone, s.motherName, s.motherPhone,
     s.blood, s.emergency, s.medical, s.disability, s.transport, s.busRoute, s.hostel,
-    s.studentPhoto, s.bFormCopy, s.prevResultCard, s.guardianCnic
+    s.studentPhoto, s.bFormCopy, s.prevResultCard, s.guardianCnic, s.isActive
   ];
 
   const { rows } = await query(sql, params);
@@ -41,7 +41,7 @@ export const createStudent = async (s) => {
  * @returns {Promise<object[]>} Array of database rows.
  */
 export const getStudentsList = async (filters = {}) => {
-  const { search, class: classFilter, section, limit = 100, offset = 0 } = filters;
+  const { search, class: classFilter, section, isActive, limit = 100, offset = 0 } = filters;
   
   let sql = 'SELECT * FROM students WHERE 1=1';
   const params = [];
@@ -62,6 +62,12 @@ export const getStudentsList = async (filters = {}) => {
   if (section) {
     sql += ` AND section = $${paramCount}`;
     params.push(section);
+    paramCount++;
+  }
+
+  if (isActive !== undefined && isActive !== null && isActive !== '') {
+    sql += ` AND is_active = $${paramCount}`;
+    params.push(String(isActive).toLowerCase() === 'true');
     paramCount++;
   }
 
@@ -129,7 +135,8 @@ export const updateStudent = async (id, s) => {
     studentPhoto: 'student_photo',
     bFormCopy: 'b_form_copy',
     prevResultCard: 'prev_result_card',
-    guardianCnic: 'guardian_cnic'
+    guardianCnic: 'guardian_cnic',
+    isActive: 'is_active'
   };
 
   for (const [key, dbCol] of Object.entries(mapping)) {

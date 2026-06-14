@@ -80,6 +80,15 @@ export const validateCreateStudent = (data) => {
     }
   }
 
+  // is_active/isActive validation
+  const isActiveVal = data.is_active !== undefined ? data.is_active : data.isActive;
+  if (isActiveVal !== undefined && isActiveVal !== null && isActiveVal !== '') {
+    const val = String(isActiveVal).toLowerCase();
+    if (val !== 'true' && val !== 'false') {
+      errors.is_active = 'is_active must be a boolean value';
+    }
+  }
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors
@@ -164,6 +173,15 @@ export const validateUpdateStudent = (data) => {
     const val = String(data.hostel).toLowerCase();
     if (val !== 'true' && val !== 'false') {
       errors.hostel = 'Hostel must be a boolean value';
+    }
+  }
+
+  // is_active/isActive validation
+  const updateIsActiveVal = data.is_active !== undefined ? data.is_active : data.isActive;
+  if (updateIsActiveVal !== undefined && updateIsActiveVal !== null && updateIsActiveVal !== '') {
+    const val = String(updateIsActiveVal).toLowerCase();
+    if (val !== 'true' && val !== 'false') {
+      errors.is_active = 'is_active must be a boolean value';
     }
   }
 

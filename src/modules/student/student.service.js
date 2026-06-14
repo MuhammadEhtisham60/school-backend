@@ -60,6 +60,8 @@ export const formatStudent = (s) => {
     bFormCopy: s.b_form_copy,
     prevResultCard: s.prev_result_card,
     guardianCnic: s.guardian_cnic,
+    isActive: s.is_active,
+    is_active: s.is_active, // user requested return of is_active specifically
     createdAt: s.created_at,
     updatedAt: s.updated_at
   };
@@ -98,6 +100,14 @@ export const enrollStudent = async (data, files = {}) => {
   const transport = String(data.transport).toLowerCase() === 'true';
   const hostel = String(data.hostel).toLowerCase() === 'true';
   const busRoute = data.busRoute || '';
+
+  // Parse is_active status
+  let isActive = true;
+  if (data.is_active !== undefined) {
+    isActive = String(data.is_active).toLowerCase() === 'true';
+  } else if (data.isActive !== undefined) {
+    isActive = String(data.isActive).toLowerCase() === 'true';
+  }
 
   // Process files: extract paths/filenames for columns
   const photo = files.photo ? `/uploads/${files.photo[0].filename}` : (data.photo || null);
@@ -141,7 +151,8 @@ export const enrollStudent = async (data, files = {}) => {
     studentPhoto,
     bFormCopy,
     prevResultCard,
-    guardianCnic
+    guardianCnic,
+    isActive
   };
 
   const student = await studentRepository.createStudent(studentPayload);
@@ -152,7 +163,11 @@ export const enrollStudent = async (data, files = {}) => {
  * Get all students list with optional filters.
  */
 export const getStudentsList = async (filters = {}) => {
-  const students = await studentRepository.getStudentsList(filters);
+  const serviceFilters = { ...filters };
+  if (filters.is_active !== undefined) {
+    serviceFilters.isActive = filters.is_active;
+  }
+  const students = await studentRepository.getStudentsList(serviceFilters);
   return students.map(formatStudent);
 };
 
@@ -206,6 +221,17 @@ export const updateStudent = async (id, data, files = {}) => {
 
   if (data.hostel !== undefined) {
     updatePayload.hostel = String(data.hostel).toLowerCase() === 'true';
+  }
+
+  // Handle is_active update
+  let updateIsActive;
+  if (data.is_active !== undefined) {
+    updateIsActive = String(data.is_active).toLowerCase() === 'true';
+  } else if (data.isActive !== undefined) {
+    updateIsActive = String(data.isActive).toLowerCase() === 'true';
+  }
+  if (updateIsActive !== undefined) {
+    updatePayload.isActive = updateIsActive;
   }
 
   // Handle files

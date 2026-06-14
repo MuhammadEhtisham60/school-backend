@@ -25,7 +25,9 @@ export const transformStudentToFormData = (data) => {
     // Health Info
     'blood', 'emergency', 'medical', 'disability',
     // Transport / Hostel
-    'transport', 'busRoute', 'hostel'
+    'transport', 'busRoute', 'hostel',
+    // Status flag
+    'isActive', 'is_active'
   ];
 
   // Append text/primitive fields
