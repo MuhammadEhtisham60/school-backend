@@ -1,0 +1,174 @@
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Validate student creation payload.
+ * @param {object} data - Request body containing student details.
+ * @returns {object} { isValid: boolean, errors: object }
+ */
+export const validateCreateStudent = (data) => {
+  const errors = {};
+
+  // 1. Basic Info
+  if (!data.fullName || typeof data.fullName !== 'string' || data.fullName.trim() === '') {
+    errors.fullName = 'Full name is required';
+  }
+
+  if (!data.fatherName || typeof data.fatherName !== 'string' || data.fatherName.trim() === '') {
+    errors.fatherName = "Father's name is required";
+  }
+
+  if (!data.dob || typeof data.dob !== 'string' || data.dob.trim() === '') {
+    errors.dob = 'Date of birth is required';
+  } else if (!DATE_REGEX.test(data.dob)) {
+    errors.dob = 'Date of birth must be in YYYY-MM-DD format';
+  }
+
+  if (!data.gender || typeof data.gender !== 'string' || data.gender.trim() === '') {
+    errors.gender = 'Gender is required';
+  } else if (!['Male', 'Female', 'Other'].includes(data.gender.trim())) {
+    errors.gender = 'Gender must be Male, Female, or Other';
+  }
+
+  // 2. Academic Info
+  if (!data.class || typeof data.class !== 'string' || data.class.trim() === '') {
+    errors.class = 'Class is required';
+  }
+
+  if (!data.section || typeof data.section !== 'string' || data.section.trim() === '') {
+    errors.section = 'Section is required';
+  }
+
+  // Last exam result validation (optional)
+  if (data.lastResult !== undefined && data.lastResult !== null && data.lastResult !== '') {
+    const num = Number(data.lastResult);
+    if (isNaN(num) || num < 0 || num > 100) {
+      errors.lastResult = 'Last result must be a number between 0 and 100';
+    }
+  }
+
+  // Admission Date validation (optional)
+  if (data.admissionDate && typeof data.admissionDate === 'string' && data.admissionDate.trim() !== '') {
+    if (!DATE_REGEX.test(data.admissionDate)) {
+      errors.admissionDate = 'Admission date must be in YYYY-MM-DD format';
+    }
+  }
+
+  // 3. Contact Info
+  if (!data.mobile || typeof data.mobile !== 'string' || data.mobile.trim() === '') {
+    errors.mobile = 'Mobile number is required';
+  }
+
+  if (data.email && typeof data.email === 'string' && data.email.trim() !== '') {
+    if (!EMAIL_REGEX.test(data.email.trim())) {
+      errors.email = 'Email format is invalid';
+    }
+  }
+
+  // 4. Transport/Hostel validation
+  if (data.transport !== undefined && data.transport !== null && data.transport !== '') {
+    const val = String(data.transport).toLowerCase();
+    if (val !== 'true' && val !== 'false') {
+      errors.transport = 'Transport must be a boolean value';
+    }
+  }
+
+  if (data.hostel !== undefined && data.hostel !== null && data.hostel !== '') {
+    const val = String(data.hostel).toLowerCase();
+    if (val !== 'true' && val !== 'false') {
+      errors.hostel = 'Hostel must be a boolean value';
+    }
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
+};
+
+/**
+ * Validate student update payload (similar to create, but elements are optional if not PUT, 
+ * but since we are doing PUT, we can run similar checks but allow flexibility).
+ * @param {object} data - Request body containing student details.
+ * @returns {object} { isValid: boolean, errors: object }
+ */
+export const validateUpdateStudent = (data) => {
+  // We can reuse the validateCreateStudent rules, but if it is partial, we validate what is provided.
+  // For PUT, we expect a complete resource, so validateCreateStudent works. Let's make it flexible
+  // but ensure required fields are validated if they are passed.
+  const errors = {};
+
+  if (data.fullName !== undefined && (!data.fullName || typeof data.fullName !== 'string' || data.fullName.trim() === '')) {
+    errors.fullName = 'Full name is required';
+  }
+
+  if (data.fatherName !== undefined && (!data.fatherName || typeof data.fatherName !== 'string' || data.fatherName.trim() === '')) {
+    errors.fatherName = "Father's name is required";
+  }
+
+  if (data.dob !== undefined) {
+    if (!data.dob || typeof data.dob !== 'string' || data.dob.trim() === '') {
+      errors.dob = 'Date of birth is required';
+    } else if (!DATE_REGEX.test(data.dob)) {
+      errors.dob = 'Date of birth must be in YYYY-MM-DD format';
+    }
+  }
+
+  if (data.gender !== undefined) {
+    if (!data.gender || typeof data.gender !== 'string' || data.gender.trim() === '') {
+      errors.gender = 'Gender is required';
+    } else if (!['Male', 'Female', 'Other'].includes(data.gender.trim())) {
+      errors.gender = 'Gender must be Male, Female, or Other';
+    }
+  }
+
+  if (data.class !== undefined && (!data.class || typeof data.class !== 'string' || data.class.trim() === '')) {
+    errors.class = 'Class is required';
+  }
+
+  if (data.section !== undefined && (!data.section || typeof data.section !== 'string' || data.section.trim() === '')) {
+    errors.section = 'Section is required';
+  }
+
+  if (data.lastResult !== undefined && data.lastResult !== null && data.lastResult !== '') {
+    const num = Number(data.lastResult);
+    if (isNaN(num) || num < 0 || num > 100) {
+      errors.lastResult = 'Last result must be a number between 0 and 100';
+    }
+  }
+
+  if (data.admissionDate !== undefined && data.admissionDate !== null && data.admissionDate !== '') {
+    if (!DATE_REGEX.test(data.admissionDate)) {
+      errors.admissionDate = 'Admission date must be in YYYY-MM-DD format';
+    }
+  }
+
+  if (data.mobile !== undefined && (!data.mobile || typeof data.mobile !== 'string' || data.mobile.trim() === '')) {
+    errors.mobile = 'Mobile number is required';
+  }
+
+  if (data.email !== undefined && data.email !== null && data.email.trim() !== '') {
+    if (!EMAIL_REGEX.test(data.email.trim())) {
+      errors.email = 'Email format is invalid';
+    }
+  }
+
+  if (data.transport !== undefined && data.transport !== null && data.transport !== '') {
+    const val = String(data.transport).toLowerCase();
+    if (val !== 'true' && val !== 'false') {
+      errors.transport = 'Transport must be a boolean value';
+    }
+  }
+
+  if (data.hostel !== undefined && data.hostel !== null && data.hostel !== '') {
+    const val = String(data.hostel).toLowerCase();
+    if (val !== 'true' && val !== 'false') {
+      errors.hostel = 'Hostel must be a boolean value';
+    }
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
+};
