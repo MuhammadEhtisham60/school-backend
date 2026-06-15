@@ -12,13 +12,13 @@ export const createStudent = async (s) => {
       prev_school, last_result, admission_date, mobile, alt_contact, email, city, address,
       father_full_name, father_cnic, occupation, father_phone, mother_name, mother_phone,
       blood, emergency, medical, disability, transport, bus_route, hostel,
-      student_photo, b_form_copy, prev_result_card, guardian_cnic, is_active, fees
+      student_photo, b_form_copy, prev_result_card, guardian_cnic, is_active, fees, class_fees
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
       $11, $12, $13, $14, $15, $16, $17, $18,
       $19, $20, $21, $22, $23, $24,
       $25, $26, $27, $28, $29, $30, $31,
-      $32, $33, $34, $35, $36, $37
+      $32, $33, $34, $35, $36, $37, $38
     )
     RETURNING *
   `;
@@ -28,7 +28,8 @@ export const createStudent = async (s) => {
     s.prevSchool, s.lastResult, s.admissionDate, s.mobile, s.altContact, s.email, s.city, s.address,
     s.fatherFullName, s.fatherCNIC, s.occupation, s.fatherPhone, s.motherName, s.motherPhone,
     s.blood, s.emergency, s.medical, s.disability, s.transport, s.busRoute, s.hostel,
-    s.studentPhoto, s.bFormCopy, s.prevResultCard, s.guardianCnic, s.isActive, JSON.stringify(s.fees || {})
+    s.studentPhoto, s.bFormCopy, s.prevResultCard, s.guardianCnic, s.isActive, JSON.stringify(s.fees || {}),
+    s.classFees || 0
   ];
 
   const { rows } = await query(sql, params);
@@ -136,7 +137,9 @@ export const updateStudent = async (id, s) => {
     bFormCopy: 'b_form_copy',
     prevResultCard: 'prev_result_card',
     guardianCnic: 'guardian_cnic',
-    isActive: 'is_active'
+    isActive: 'is_active',
+    classFees: 'class_fees',
+    class_fees: 'class_fees'
   };
 
   for (const [key, dbCol] of Object.entries(mapping)) {

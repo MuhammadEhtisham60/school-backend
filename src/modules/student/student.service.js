@@ -62,6 +62,7 @@ export const formatStudent = (s) => {
     guardianCnic: s.guardian_cnic,
     isActive: s.is_active,
     is_active: s.is_active, // user requested return of is_active specifically
+    classFees: s.class_fees !== null ? Number(s.class_fees) : 0,
     fees: typeof s.fees === 'string' ? JSON.parse(s.fees) : (s.fees || {}),
     createdAt: s.created_at,
     updatedAt: s.updated_at
@@ -143,6 +144,9 @@ export const enrollStudent = async (data, files = {}) => {
   const prevResultCard = files.prevResultCard ? `/uploads/${files.prevResultCard[0].filename}` : (data.prevResultCard || null);
   const guardianCnic = files.guardianCnic ? `/uploads/${files.guardianCnic[0].filename}` : (data.guardianCnic || null);
 
+  // Parse class fees
+  const classFees = data.class_fees !== undefined && data.class_fees !== null && data.class_fees !== '' ? Number(data.class_fees) : (data.classFees !== undefined && data.classFees !== null && data.classFees !== '' ? Number(data.classFees) : 0);
+
   const studentPayload = {
     id: studentId,
     fullName: data.fullName.trim(),
@@ -180,7 +184,8 @@ export const enrollStudent = async (data, files = {}) => {
     prevResultCard,
     guardianCnic,
     isActive,
-    fees
+    fees,
+    classFees
   };
 
   const student = await studentRepository.createStudent(studentPayload);
@@ -260,6 +265,13 @@ export const updateStudent = async (id, data, files = {}) => {
   }
   if (updateIsActive !== undefined) {
     updatePayload.isActive = updateIsActive;
+  }
+
+  // Handle classFees update
+  if (data.class_fees !== undefined) {
+    updatePayload.classFees = data.class_fees === '' ? 0 : Number(data.class_fees);
+  } else if (data.classFees !== undefined) {
+    updatePayload.classFees = data.classFees === '' ? 0 : Number(data.classFees);
   }
 
   // Handle files

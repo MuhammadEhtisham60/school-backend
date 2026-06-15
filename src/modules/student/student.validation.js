@@ -89,6 +89,15 @@ export const validateCreateStudent = (data) => {
     }
   }
 
+  // class_fees/classFees validation
+  const classFeesVal = data.class_fees !== undefined ? data.class_fees : data.classFees;
+  if (classFeesVal !== undefined && classFeesVal !== null && classFeesVal !== '') {
+    const num = Number(classFeesVal);
+    if (isNaN(num) || num < 0) {
+      errors.class_fees = 'Class fees must be a positive number or zero';
+    }
+  }
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors
@@ -182,6 +191,15 @@ export const validateUpdateStudent = (data) => {
     const val = String(updateIsActiveVal).toLowerCase();
     if (val !== 'true' && val !== 'false') {
       errors.is_active = 'is_active must be a boolean value';
+    }
+  }
+
+  // class_fees/classFees validation
+  const updateClassFeesVal = data.class_fees !== undefined ? data.class_fees : data.classFees;
+  if (updateClassFeesVal !== undefined && updateClassFeesVal !== null && updateClassFeesVal !== '') {
+    const num = Number(updateClassFeesVal);
+    if (isNaN(num) || num < 0) {
+      errors.class_fees = 'Class fees must be a positive number or zero';
     }
   }
 
