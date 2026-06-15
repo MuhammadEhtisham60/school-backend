@@ -54,6 +54,37 @@ export const createFee = async (feeData, userId) => {
     throw createError('Fee for this month already exists.', 400);
   }
 
+  // 3. Restrict skipping months (e.g. if Feb exists, July is added directly, restrict it)
+  const MONTHS_ORDER = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const targetIdx = MONTHS_ORDER.indexOf(feeData.month);
+  if (targetIdx !== -1) {
+    const existingFeesList = await feeModel.findByStudentId(feeData.studentId);
+    if (existingFeesList && existingFeesList.length > 0) {
+      let maxIdx = -1;
+      existingFeesList.forEach((ef) => {
+        const idx = MONTHS_ORDER.indexOf(ef.month);
+        if (idx > maxIdx) {
+          maxIdx = idx;
+        }
+      });
+
+      if (maxIdx !== -1 && targetIdx > maxIdx + 1) {
+        const missingMonths = [];
+        for (let i = maxIdx + 1; i < targetIdx; i++) {
+          missingMonths.push(MONTHS_ORDER[i]);
+        }
+        throw createError(
+          `Cannot add fee for ${feeData.month}. Please record fees for the preceding month(s) first: ${missingMonths.join(', ')}.`,
+          400
+        );
+      }
+    }
+  }
+
   // 3. Create fee record
   const createdRaw = await feeModel.create({
     ...feeData,

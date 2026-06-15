@@ -47,32 +47,21 @@ Add a monthly fee against a student.
   - `paymentDate` (string, required): Must be in `YYYY-MM-DD` format.
   - `paymentMethod` (string, required): Any non-empty string.
   - `status` (string, optional): Defaults to `Paid` if omitted.
+  - **Skip-Month Restriction**: You cannot skip months when adding fees. For instance, if the latest recorded fee is for `February`, attempting to add a fee for `July` will be rejected with a `400 Bad Request` listing all intermediate missing months.
 - **Expected Responses**:
   - **201 Created (Success)**:
     ```json
     {
       "success": true,
       "message": "Fee added successfully.",
-      "data": {
-        "id": 1,
-        "studentId": {
-          "id": "std_135428019",
-          "name": "Ali Khan",
-          "admissionNo": "std_135428019",
-          "class": "Grade 5",
-          "section": "Green",
-          "rollNumber": "2026-268"
-        },
-        "month": "January",
-        "amount": 5000,
-        "paymentDate": "2026-06-15",
-        "paymentMethod": "Cash",
-        "status": "Paid",
-        "remarks": "Monthly Tuition Fee",
-        "createdBy": 1,
-        "createdAt": "2026-06-15T20:30:46.000Z",
-        "updatedAt": "2026-06-15T20:30:46.000Z"
-      }
+      "data": { ... }
+    }
+    ```
+  - **400 Bad Request (Month Skip Restriction)**:
+    ```json
+    {
+      "success": false,
+      "message": "Cannot add fee for July. Please record fees for the preceding month(s) first: March, April, May, June."
     }
     ```
   - **400 Bad Request (Duplicate)**:
