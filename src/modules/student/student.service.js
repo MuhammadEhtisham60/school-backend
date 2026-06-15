@@ -315,8 +315,24 @@ export const updateMonthlyFee = async (id, month, data) => {
 
   const fees = typeof student.fees === 'string' ? JSON.parse(student.fees) : (student.fees || {});
   const normalizedMonth = month.toLowerCase();
-  if (!fees[normalizedMonth]) {
+  const validMonths = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'
+  ];
+
+  if (!validMonths.includes(normalizedMonth)) {
     throw createError(`Invalid month name: ${month}`, 400);
+  }
+
+  if (!fees[normalizedMonth]) {
+    fees[normalizedMonth] = {
+      status: 'pending',
+      amount: 0,
+      paid_amount: 0,
+      due_amount: 0,
+      paid_at: null,
+      remarks: ''
+    };
   }
 
   const monthRecord = fees[normalizedMonth];
@@ -358,8 +374,17 @@ export const payMonthlyFee = async (id, month, data) => {
 
   const fees = typeof student.fees === 'string' ? JSON.parse(student.fees) : (student.fees || {});
   const normalizedMonth = month.toLowerCase();
-  if (!fees[normalizedMonth]) {
+  const validMonths = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'
+  ];
+
+  if (!validMonths.includes(normalizedMonth)) {
     throw createError(`Invalid month name: ${month}`, 400);
+  }
+
+  if (!fees[normalizedMonth]) {
+    throw createError(`Fee is not configured for month: ${month}`, 400);
   }
 
   const monthRecord = fees[normalizedMonth];

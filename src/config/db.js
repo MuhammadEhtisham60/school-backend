@@ -133,8 +133,28 @@ export const initDB = async () => {
     await client.query('ALTER TABLE students ADD COLUMN IF NOT EXISTS fees JSONB DEFAULT \'{}\'');
 
     console.log('Students table verified/created successfully.');
+
+    // Create fees table if not exists
+    const createFeesTableQuery = `
+      CREATE TABLE IF NOT EXISTS fees (
+        id SERIAL PRIMARY KEY,
+        student_id VARCHAR(50) NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+        month VARCHAR(20) NOT NULL,
+        amount NUMERIC NOT NULL CHECK (amount > 0),
+        payment_date DATE NOT NULL,
+        payment_method VARCHAR(50) NOT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'Paid',
+        remarks TEXT,
+        created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (student_id, month)
+      );
+    `;
+    await client.query(createFeesTableQuery);
+    console.log('Fees table verified/created successfully.');
   } catch (tableErr) {
-    console.error('Failed to initialize users table:', tableErr);
+    console.error('Failed to initialize database tables:', tableErr);
     throw tableErr;
   } finally {
     if (client) {
