@@ -136,6 +136,44 @@ export const initDB = async () => {
 
     console.log('Students table verified/created successfully.');
 
+    // Create classes table if not exists
+    const createClassesTableQuery = `
+      CREATE TABLE IF NOT EXISTS classes (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) UNIQUE NOT NULL,
+        display_order INTEGER NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        is_deleted BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    await client.query(createClassesTableQuery);
+    console.log('Classes table verified/created successfully.');
+
+    // Seed default classes if the table is empty
+    const seedClassesQuery = `
+      INSERT INTO classes (id, name, display_order)
+      VALUES 
+        ('Nursery', 'Class Nursery', 1),
+        ('KG', 'Class KG', 2),
+        ('1', 'Class 1', 3),
+        ('2', 'Class 2', 4),
+        ('3', 'Class 3', 5),
+        ('4', 'Class 4', 6),
+        ('5', 'Class 5', 7),
+        ('6', 'Class 6', 8),
+        ('7', 'Class 7', 9),
+        ('8', 'Class 8', 10),
+        ('9', 'Class 9', 11),
+        ('10', 'Class 10', 12),
+        ('11', 'Class 11', 13),
+        ('12', 'Class 12', 14)
+      ON CONFLICT (id) DO NOTHING;
+    `;
+    await client.query(seedClassesQuery);
+    console.log('Default classes seeded successfully.');
+
     // Create fees table if not exists
     const createFeesTableQuery = `
       CREATE TABLE IF NOT EXISTS fees (
