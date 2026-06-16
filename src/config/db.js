@@ -151,6 +151,21 @@ export const initDB = async () => {
     await client.query(createClassesTableQuery);
     console.log('Classes table verified/created successfully.');
 
+    // Create class_subjects table if not exists
+    const createClassSubjectsTableQuery = `
+      CREATE TABLE IF NOT EXISTS class_subjects (
+        id SERIAL PRIMARY KEY,
+        class_id VARCHAR(50) NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+        subject_name VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (class_id, subject_name)
+      );
+    `;
+    await client.query(createClassSubjectsTableQuery);
+    console.log('Class subjects table verified/created successfully.');
+
+
     // Seed default classes if the table is empty
     const seedClassesQuery = `
       INSERT INTO classes (id, name, display_order)
