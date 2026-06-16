@@ -155,6 +155,69 @@ export const initDB = async () => {
     `;
     await client.query(createFeesTableQuery);
     console.log('Fees table verified/created successfully.');
+
+    // Create academic_records table if not exists
+    const createAcademicRecordsTableQuery = `
+      CREATE TABLE IF NOT EXISTS academic_records (
+        id SERIAL PRIMARY KEY,
+        student_id VARCHAR(50) NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+        academic_year VARCHAR(50) NOT NULL,
+        class VARCHAR(50) NOT NULL,
+        section VARCHAR(50) NOT NULL,
+        roll_no VARCHAR(100),
+        promotion_status VARCHAR(50) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (student_id, academic_year, class)
+      );
+    `;
+    await client.query(createAcademicRecordsTableQuery);
+    console.log('Academic records table verified/created successfully.');
+
+    // Create term_results table if not exists
+    const createTermResultsTableQuery = `
+      CREATE TABLE IF NOT EXISTS term_results (
+        id SERIAL PRIMARY KEY,
+        academic_record_id INTEGER NOT NULL REFERENCES academic_records(id) ON DELETE CASCADE,
+        term_name VARCHAR(50) NOT NULL,
+        total_marks NUMERIC NOT NULL CHECK (total_marks >= 0),
+        obtained_marks NUMERIC NOT NULL CHECK (obtained_marks >= 0),
+        percentage NUMERIC NOT NULL CHECK (percentage >= 0 AND percentage <= 100),
+        grade VARCHAR(10) NOT NULL,
+        gpa NUMERIC DEFAULT NULL,
+        position INTEGER DEFAULT NULL,
+        remarks TEXT,
+        result_status VARCHAR(20) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (academic_record_id, term_name),
+        CONSTRAINT check_term_obtained_marks CHECK (obtained_marks <= total_marks)
+      );
+    `;
+    await client.query(createTermResultsTableQuery);
+    console.log('Term results table verified/created successfully.');
+
+    // Create subject_marks table if not exists
+    const createSubjectMarksTableQuery = `
+      CREATE TABLE IF NOT EXISTS subject_marks (
+        id SERIAL PRIMARY KEY,
+        term_result_id INTEGER NOT NULL REFERENCES term_results(id) ON DELETE CASCADE,
+        subject_name VARCHAR(100) NOT NULL,
+        total_marks NUMERIC NOT NULL CHECK (total_marks > 0),
+        obtained_marks NUMERIC NOT NULL CHECK (obtained_marks >= 0),
+        grade VARCHAR(10),
+        gpa NUMERIC DEFAULT NULL,
+        status VARCHAR(20),
+        remarks TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (term_result_id, subject_name),
+        CONSTRAINT check_subject_obtained_marks CHECK (obtained_marks <= total_marks)
+      );
+    `;
+    await client.query(createSubjectMarksTableQuery);
+    console.log('Subject marks table verified/created successfully.');
+
   } catch (tableErr) {
     console.error('Failed to initialize database tables:', tableErr);
     throw tableErr;

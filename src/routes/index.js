@@ -4,6 +4,7 @@ import authRouter from '../modules/auth/auth.routes.js';
 import profileRouter from '../modules/profile/profile.routes.js';
 import studentRouter from '../modules/student/student.routes.js';
 import feeRouter from '../modules/fee/fee.routes.js';
+import resultRouter from '../modules/result/result.routes.js';
 
 export const apiRouter = Router();
 
@@ -21,3 +22,6 @@ apiRouter.use('/students', studentRouter);
 
 // Fee routes
 apiRouter.use('/fees', feeRouter);
+
+// Result routes
+apiRouter.use('/results', resultRouter);
